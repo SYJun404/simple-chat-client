@@ -1,0 +1,15 @@
+[
+    {
+        "label": "Swing Run Develop",
+        "command": "mvn clean package -DskipTests && java -jar target/ChatApp-1.0.0.jar",
+        "show_summary": true,
+        "show_command": true,
+        "reveal": "never",
+    },
+    {
+        "label": "Swing Run Client",
+        "command": "java -jar target/ChatApp-1.0.0.jar",
+        "show_summary": true,
+        "show_command": true,
+    },
+]

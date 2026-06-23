@@ -1,13 +1,18 @@
 package com.chatapp.ui.login;
 
 import com.chatapp.service.UserService;
+import com.chatapp.spring.api.ApiClient;
+import com.chatapp.spring.api.ApiException;
+import com.chatapp.spring.res.*;
 import com.chatapp.ui.chat.MainFrame;
 import com.chatapp.util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class LoginFrame extends JFrame {
 
@@ -25,13 +30,13 @@ public class LoginFrame extends JFrame {
     private JPasswordField regConfirmField;
 
     public LoginFrame() {
-        setTitle("ChatApp - 欢迎");
+        setTitle("Simple Chat");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setSize(420, 540);
         setLocationRelativeTo(null);
         setBackground(UIConstants.BG_DARK);
-
+        setLocation(1500, 200);
         initUI();
     }
 
@@ -45,26 +50,27 @@ public class LoginFrame extends JFrame {
         logoPanel.setOpaque(false);
         logoPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
 
-        JLabel icon = new JLabel("💬");
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
-        icon.setHorizontalAlignment(SwingConstants.CENTER);
+        String imagePath = "src/main/resources/chat-icon.png";
+        ImageIcon originalIcon = new ImageIcon(imagePath);
 
-        JLabel title = new JLabel("ChatApp");
+        Image scaledImage = originalIcon
+            .getImage()
+            .getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+        ImageIcon imageIcon = new ImageIcon(scaledImage);
+
+        JLabel icon = new JLabel(imageIcon);
+
+        JLabel title = new JLabel("Simple Chat");
         title.setFont(UIConstants.FONT_TITLE);
         title.setForeground(UIConstants.TEXT_PRIMARY);
         title.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JLabel subtitle = new JLabel("简单 · 高效 · 畅连");
-        subtitle.setFont(UIConstants.FONT_SMALL);
-        subtitle.setForeground(UIConstants.TEXT_SECONDARY);
-        subtitle.setHorizontalAlignment(SwingConstants.CENTER);
-
         logoPanel.add(icon, BorderLayout.NORTH);
         logoPanel.add(title, BorderLayout.CENTER);
-        logoPanel.add(subtitle, BorderLayout.SOUTH);
 
         // Tab 面板
         tabbedPane = new JTabbedPane();
+
         tabbedPane.setBackground(UIConstants.BG_PANEL);
         tabbedPane.setForeground(UIConstants.TEXT_PRIMARY);
         tabbedPane.setFont(UIConstants.FONT_NORMAL);
@@ -83,35 +89,43 @@ public class LoginFrame extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(6, 4, 6, 4);
-        gbc.gridx = 0; gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
 
-        loginUsernameField = createTextField("用户名");
-        loginPasswordField = createPasswordField("密码");
+        loginUsernameField = createTextField("Enter Username");
+        loginPasswordField = createPasswordField("Enter Password");
 
-        StyledButton loginBtn = new StyledButton("登 录", UIConstants.ACCENT, UIConstants.ACCENT_HOVER);
+        StyledButton loginBtn = new StyledButton(
+            "登 录",
+            UIConstants.ACCENT,
+            UIConstants.ACCENT_HOVER
+        );
         loginBtn.setPreferredSize(new Dimension(0, 40));
         loginBtn.addActionListener(e -> doLogin());
 
         // Enter 触发登录
-        loginPasswordField.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) doLogin();
+        loginPasswordField.addKeyListener(
+            new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) doLogin();
+                }
             }
-        });
+        );
 
-        JLabel hint = new JLabel("演示账号：admin / 123456");
-        hint.setFont(UIConstants.FONT_SMALL);
-        hint.setForeground(UIConstants.TEXT_SECONDARY);
-        hint.setHorizontalAlignment(SwingConstants.CENTER);
-
-        gbc.gridy = 0; panel.add(new JLabel("  用户名"), gbc);
-        gbc.gridy = 1; panel.add(loginUsernameField, gbc);
-        gbc.gridy = 2; panel.add(new JLabel("  密　码"), gbc);
-        gbc.gridy = 3; panel.add(loginPasswordField, gbc);
-        gbc.gridy = 4; gbc.insets = new Insets(16, 4, 6, 4);
+        gbc.gridy = 0;
+        panel.add(new JLabel("  用户名"), gbc);
+        gbc.gridy = 1;
+        panel.add(loginUsernameField, gbc);
+        gbc.gridy = 2;
+        panel.add(new JLabel("  密　码"), gbc);
+        gbc.gridy = 3;
+        panel.add(loginPasswordField, gbc);
+        gbc.gridy = 4;
+        gbc.insets = new Insets(16, 4, 6, 4);
         panel.add(loginBtn, gbc);
-        gbc.gridy = 5; gbc.insets = new Insets(4, 4, 4, 4);
-        panel.add(hint, gbc);
+        gbc.gridy = 5;
+        gbc.insets = new Insets(4, 4, 4, 4);
 
         for (Component c : panel.getComponents()) {
             if (c instanceof JLabel) {
@@ -129,22 +143,27 @@ public class LoginFrame extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(4, 4, 4, 4);
-        gbc.gridx = 0; gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
 
-        regUsernameField  = createTextField("登录用户名");
-        regNicknameField  = createTextField("显示昵称");
-        regPasswordField  = createPasswordField("设置密码");
-        regConfirmField   = createPasswordField("确认密码");
+        regUsernameField = createTextField("登录用户名");
+        regNicknameField = createTextField("显示昵称");
+        regPasswordField = createPasswordField("设置密码");
+        regConfirmField = createPasswordField("确认密码");
 
-        StyledButton regBtn = new StyledButton("注 册", UIConstants.ACCENT, UIConstants.ACCENT_HOVER);
+        StyledButton regBtn = new StyledButton(
+            "注 册",
+            UIConstants.ACCENT,
+            UIConstants.ACCENT_HOVER
+        );
         regBtn.setPreferredSize(new Dimension(0, 40));
         regBtn.addActionListener(e -> doRegister());
 
         Object[][] rows = {
-            {"  用户名", regUsernameField},
-            {"  昵　称", regNicknameField},
-            {"  密　码", regPasswordField},
-            {"  确认密码", regConfirmField}
+            { "  用户名", regUsernameField },
+            { "  昵　称", regNicknameField },
+            { "  密　码", regPasswordField },
+            { "  确认密码", regConfirmField },
         };
 
         int row = 0;
@@ -158,7 +177,8 @@ public class LoginFrame extends JFrame {
             panel.add((Component) r[1], gbc);
         }
 
-        gbc.gridy = row; gbc.insets = new Insets(14, 4, 6, 4);
+        gbc.gridy = row;
+        gbc.insets = new Insets(14, 4, 6, 4);
         panel.add(regBtn, gbc);
         return panel;
     }
@@ -172,19 +192,67 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        if (userService.login(username, password)) {
-            dispose();
-            SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
-        } else {
-            showError("用户名或密码错误");
-        }
+        new SwingWorker<ApiResponse<UserResponse>, Void>() {
+            @Override
+            protected ApiResponse<UserResponse> doInBackground()
+                throws Exception {
+                // 此处在后台线程，可以安全发网络请求
+                Map<String, String> body = Map.of(
+                    "username",
+                    username,
+                    "password",
+                    password
+                );
+                return ApiClient.post(
+                    "/auth/login",
+                    body,
+                    new TypeReference<ApiResponse<UserResponse>>() {}
+                );
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    ApiResponse<UserResponse> resp = get(); // 拿到 doInBackground 的结果
+                    if (resp.getCode() == 200) {
+                        SessionManager.getInstance().login(
+                            resp.getData().getId(),
+                            resp.getData().getNickname(),
+                            resp.getData().getUsername(),
+                            resp.getData().getAvatar(),
+                            resp.getData().getStatus()
+                        );
+                        dispose();
+                        SwingUtilities.invokeLater(() ->
+                            new MainFrame().setVisible(true)
+                        );
+                    } else {
+                        showError(resp.getMessage());
+                    }
+                } catch (ExecutionException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof ApiException) {
+                        ApiException apiEx = (ApiException) cause;
+                        if (apiEx.getStatusCode() == 401) {
+                            showError("用户名或密码错误");
+                        } else {
+                            showError("服务器错误：" + apiEx.getStatusCode());
+                        }
+                    } else {
+                        showError("网络连接失败，请检查服务器");
+                    }
+                } catch (Exception e) {
+                    showError("未知错误：" + e.getMessage());
+                }
+            }
+        }.execute();
     }
 
     private void doRegister() {
-        String username  = regUsernameField.getText().trim();
-        String nickname  = regNicknameField.getText().trim();
-        String password  = new String(regPasswordField.getPassword());
-        String confirm   = new String(regConfirmField.getPassword());
+        String username = regUsernameField.getText().trim();
+        String nickname = regNicknameField.getText().trim();
+        String password = new String(regPasswordField.getPassword());
+        String confirm = new String(regConfirmField.getPassword());
 
         if (username.isEmpty() || nickname.isEmpty() || password.isEmpty()) {
             showError("所有字段不能为空");
@@ -200,7 +268,12 @@ public class LoginFrame extends JFrame {
         }
 
         if (userService.register(username, password, nickname)) {
-            JOptionPane.showMessageDialog(this, "注册成功！请登录", "提示", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "注册成功！请登录",
+                "提示",
+                JOptionPane.INFORMATION_MESSAGE
+            );
             tabbedPane.setSelectedIndex(0);
             loginUsernameField.setText(username);
         } else {
@@ -209,11 +282,17 @@ public class LoginFrame extends JFrame {
     }
 
     private void showError(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "错误", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(
+            this,
+            msg,
+            "错误",
+            JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private JTextField createTextField(String placeholder) {
         JTextField field = new JTextField();
+        field.setFont(UIConstants.FONT_NORMAL);
         field.setPreferredSize(new Dimension(0, 36));
         field.putClientProperty("JTextField.placeholderText", placeholder);
         return field;
@@ -221,6 +300,7 @@ public class LoginFrame extends JFrame {
 
     private JPasswordField createPasswordField(String placeholder) {
         JPasswordField field = new JPasswordField();
+        field.setFont(UIConstants.FONT_NORMAL);
         field.setPreferredSize(new Dimension(0, 36));
         field.putClientProperty("JTextField.placeholderText", placeholder);
         return field;

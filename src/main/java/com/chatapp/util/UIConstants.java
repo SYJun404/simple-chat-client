@@ -5,7 +5,7 @@ import java.awt.*;
 public class UIConstants {
 
     // 主色调
-    public static final Color ACCENT = new Color(0x2675BF);
+    public static final Color ACCENT = new Color(0x4a90d9);
     public static final Color ACCENT_HOVER = new Color(0x1A5FA8);
 
     // 背景
