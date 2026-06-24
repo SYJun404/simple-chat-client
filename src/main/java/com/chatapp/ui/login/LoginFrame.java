@@ -184,9 +184,10 @@ public class LoginFrame extends JFrame {
     }
 
     private void doLogin() {
-        String username = loginUsernameField.getText().trim();
-        String password = new String(loginPasswordField.getPassword());
-
+        // String username = loginUsernameField.getText().trim();
+        // String password = new String(loginPasswordField.getPassword());
+        String username = "1001";
+        String password = "123456";
         if (username.isEmpty() || password.isEmpty()) {
             showError("用户名和密码不能为空");
             return;
@@ -217,8 +218,8 @@ public class LoginFrame extends JFrame {
                     if (resp.getCode() == 200) {
                         SessionManager.getInstance().login(
                             resp.getData().getId(),
-                            resp.getData().getNickname(),
                             resp.getData().getUsername(),
+                            resp.getData().getNickname(),
                             resp.getData().getAvatar(),
                             resp.getData().getStatus()
                         );

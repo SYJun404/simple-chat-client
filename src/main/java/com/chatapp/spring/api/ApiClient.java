@@ -34,7 +34,7 @@ public class ApiClient {
         return MAPPER.readValue(response.body(), typeRef);
     }
 
-    public static <T> T get(String path, Class<T> responseType)
+    public static <T> T get(String path, TypeReference<T> typeRef)
         throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(BASE_URL + path))
@@ -46,6 +46,6 @@ public class ApiClient {
             HttpResponse.BodyHandlers.ofString()
         );
 
-        return MAPPER.readValue(response.body(), responseType);
+        return MAPPER.readValue(response.body(), typeRef);
     }
 }

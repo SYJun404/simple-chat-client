@@ -1,5 +1,8 @@
 package com.chatapp.util;
 
+import com.chatapp.spring.res.UserResponse;
+import java.util.List;
+
 public class SessionManager {
 
     private static SessionManager instance;
@@ -9,6 +12,7 @@ public class SessionManager {
     private String nickname;
     private String avatar;
     private Integer status;
+    private List<UserResponse> friendList;
 
     private SessionManager() {}
 
@@ -29,6 +33,10 @@ public class SessionManager {
         this.nickname = nickname;
         this.avatar = avatar;
         this.status = status;
+    }
+
+    public void setFriendList(List<UserResponse> friendList) {
+        this.friendList = friendList;
     }
 
     public void logout() {
@@ -57,6 +65,20 @@ public class SessionManager {
 
     public Integer getStatus() {
         return status;
+    }
+
+    public List<UserResponse> getFriendList() {
+        return this.friendList;
+    }
+
+    public UserResponse getFriendByName(String name) {
+        if (name == null || friendList == null) return null;
+        for (UserResponse friend : friendList) {
+            if (name.equalsIgnoreCase(friend.getUsername())) {
+                return friend;
+            }
+        }
+        return null;
     }
 
     public boolean isLoggedIn() {

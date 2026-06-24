@@ -1,7 +1,7 @@
 package com.chatapp.ui.chat;
 
-import com.chatapp.model.User;
 import com.chatapp.service.UserService;
+import com.chatapp.spring.res.UserResponse;
 import com.chatapp.ui.friend.AddFriendDialog;
 import com.chatapp.ui.login.LoginFrame;
 import com.chatapp.util.*;
@@ -17,7 +17,7 @@ public class MainFrame extends JFrame {
     private JLabel chatTitleLabel;
 
     public MainFrame() {
-        setTitle("ChatApp");
+        setTitle("Simple Chat");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 650);
         setMinimumSize(new Dimension(700, 500));
@@ -77,31 +77,32 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel buildUserBar() {
-        User me = userService.getCurrentUser();
+        SessionManager session = SessionManager.getInstance();
+
         JPanel panel = new JPanel(new BorderLayout(10, 0));
         panel.setBackground(UIConstants.BG_SIDEBAR);
-        panel.setBorder(new EmptyBorder(16, 14, 16, 14));
+        panel.setBorder(new EmptyBorder(6, 12, 6, 12));
 
-        AvatarPanel avatar = new AvatarPanel(
-            me.getNickname(),
-            UIConstants.AVATAR_SIZE
-        );
-
-        JPanel info = new JPanel(new GridLayout(2, 1, 0, 2));
+        // 根据ID获取图片地址
+        String imgPath =
+            "src/main/resources/icons/" + (session.getId() % 5) + ".png";
+        AvatarLabel iconAvatar = new AvatarLabel(imgPath);
+        JPanel info = new JPanel(new GridLayout(2, 1, 0, 0));
         info.setOpaque(false);
 
-        JLabel nameLabel = new JLabel(me.getNickname());
+        JLabel nameLabel = new JLabel(session.getNickname());
         nameLabel.setFont(UIConstants.FONT_NORMAL);
         nameLabel.setForeground(UIConstants.TEXT_PRIMARY);
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
 
         JLabel statusLabel = new JLabel("● 在线");
         statusLabel.setFont(UIConstants.FONT_SMALL);
-        statusLabel.setForeground(new Color(0x2E8B57));
+        statusLabel.setForeground(new Color(0x18A058));
 
         info.add(nameLabel);
         info.add(statusLabel);
 
-        panel.add(avatar, BorderLayout.WEST);
+        panel.add(iconAvatar, BorderLayout.WEST);
         panel.add(info, BorderLayout.CENTER);
 
         // 底部分割线
@@ -131,7 +132,7 @@ public class MainFrame extends JFrame {
         });
 
         StyledButton logoutBtn = new StyledButton(
-            "退出",
+            "× 退出",
             new Color(0xC8CDD4),
             new Color(0xB0B8C1),
             UIConstants.TEXT_PRIMARY
@@ -147,9 +148,6 @@ public class MainFrame extends JFrame {
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(UIConstants.BG_SIDEBAR);
-        JSeparator sep = new JSeparator();
-        sep.setForeground(UIConstants.BORDER);
-        wrapper.add(sep, BorderLayout.NORTH);
         wrapper.add(panel, BorderLayout.CENTER);
         return wrapper;
     }
@@ -164,11 +162,11 @@ public class MainFrame extends JFrame {
         titleBar.setBorder(
             new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0, UIConstants.BORDER),
-                new EmptyBorder(12, 20, 12, 20)
+                new EmptyBorder(17, 20, 17, 20)
             )
         );
 
-        chatTitleLabel = new JLabel("选择一个好友开始聊天");
+        chatTitleLabel = new JLabel("← 从左侧选择好友开始聊天");
         chatTitleLabel.setFont(UIConstants.FONT_LARGE);
         chatTitleLabel.setForeground(UIConstants.TEXT_PRIMARY);
         titleBar.add(chatTitleLabel, BorderLayout.WEST);
@@ -182,8 +180,8 @@ public class MainFrame extends JFrame {
     }
 
     private void openChat(String friendUsername) {
-        UserService svc = UserService.getInstance();
-        User friend = svc.getUserByUsername(friendUsername);
+        SessionManager session = SessionManager.getInstance();
+        UserResponse friend = session.getFriendByName(friendUsername);
         if (friend == null) return;
 
         chatTitleLabel.setText(friend.getNickname());

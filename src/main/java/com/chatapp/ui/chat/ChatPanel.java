@@ -4,12 +4,11 @@ import com.chatapp.model.Message;
 import com.chatapp.service.MessageService;
 import com.chatapp.service.UserService;
 import com.chatapp.util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class ChatPanel extends JPanel {
 
@@ -50,48 +49,53 @@ public class ChatPanel extends JPanel {
 
     private JPanel buildInputPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 0));
-        panel.setBackground(UIConstants.BG_PANEL);
-        panel.setBorder(new CompoundBorder(
-            new MatteBorder(1, 0, 0, 0, UIConstants.BORDER),
-            new EmptyBorder(12, 16, 12, 16)
-        ));
+        panel.setBackground(UIConstants.BG_DARK);
+        panel.setBorder(
+            new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, UIConstants.BORDER),
+                new EmptyBorder(12, 12, 12, 12)
+            )
+        );
 
         inputArea = new JTextArea(3, 0);
         inputArea.setFont(UIConstants.FONT_NORMAL);
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
-        inputArea.setBackground(UIConstants.BG_PANEL);
+        inputArea.setBackground(UIConstants.BG_DARK);
         inputArea.setForeground(UIConstants.TEXT_PRIMARY);
         inputArea.setCaretColor(UIConstants.TEXT_PRIMARY);
-        inputArea.setBorder(new CompoundBorder(
-            new LineBorder(UIConstants.BORDER, 1, true),
-            new EmptyBorder(8, 10, 8, 10)
-        ));
+        inputArea.setBorder(
+            new CompoundBorder(
+                new LineBorder(UIConstants.BORDER, 1, true),
+                new EmptyBorder(8, 8, 8, 8)
+            )
+        );
         // Ctrl+Enter 发送
-        inputArea.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()) {
-                    e.consume();
-                    doSend();
+        inputArea.addKeyListener(
+            new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (
+                        e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()
+                    ) {
+                        e.consume();
+                        doSend();
+                    }
                 }
             }
-        });
+        );
 
-        sendBtn = new StyledButton("发 送", UIConstants.ACCENT, UIConstants.ACCENT_HOVER);
+        sendBtn = new StyledButton(
+            "发 送",
+            UIConstants.ACCENT,
+            UIConstants.ACCENT_HOVER
+        );
         sendBtn.setPreferredSize(new Dimension(80, 60));
         sendBtn.addActionListener(e -> doSend());
-        sendBtn.setEnabled(false);
-
-        // 提示文字
-        JLabel hint = new JLabel("Ctrl+Enter 发送");
-        hint.setFont(UIConstants.FONT_SMALL);
-        hint.setForeground(UIConstants.TEXT_SECONDARY);
-        hint.setBorder(new EmptyBorder(4, 2, 0, 0));
 
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setOpaque(false);
         leftPanel.add(inputArea, BorderLayout.CENTER);
-        leftPanel.add(hint, BorderLayout.SOUTH);
 
         panel.add(leftPanel, BorderLayout.CENTER);
         panel.add(sendBtn, BorderLayout.EAST);
@@ -100,9 +104,9 @@ public class ChatPanel extends JPanel {
 
     public void loadChat(String friendUsername) {
         this.currentFriend = friendUsername;
-        sendBtn.setEnabled(true);
         inputArea.setEnabled(true);
-        refreshMessages();
+        inputArea.setBackground(UIConstants.BG_PANEL);
+        // refreshMessages();
         inputArea.requestFocus();
     }
 
@@ -140,13 +144,17 @@ public class ChatPanel extends JPanel {
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         // 头像
-        String senderNick = userService.getUserByUsername(msg.getSender()) != null
+        String senderNick =
+            userService.getUserByUsername(msg.getSender()) != null
                 ? userService.getUserByUsername(msg.getSender()).getNickname()
                 : msg.getSender();
         AvatarPanel avatar = new AvatarPanel(senderNick, 34);
 
         // 气泡内容
-        JPanel bubble = new RoundedPanel(16, isMine ? UIConstants.BG_BUBBLE_ME : UIConstants.BG_BUBBLE_OTHER);
+        JPanel bubble = new RoundedPanel(
+            16,
+            isMine ? UIConstants.BG_BUBBLE_ME : UIConstants.BG_BUBBLE_OTHER
+        );
         bubble.setLayout(new BorderLayout());
         bubble.setBorder(new EmptyBorder(8, 12, 8, 12));
 
@@ -154,20 +162,26 @@ public class ChatPanel extends JPanel {
         content.setEditable(false);
         content.setOpaque(false);
         content.setFont(UIConstants.FONT_NORMAL);
-        content.setForeground(isMine ? UIConstants.TEXT_WHITE : UIConstants.TEXT_PRIMARY);
+        content.setForeground(
+            isMine ? UIConstants.TEXT_WHITE : UIConstants.TEXT_PRIMARY
+        );
         content.setLineWrap(true);
         content.setWrapStyleWord(true);
         content.setMaximumSize(new Dimension(400, Integer.MAX_VALUE));
 
         JLabel time = new JLabel(msg.getFormattedTime());
         time.setFont(UIConstants.FONT_SMALL);
-        time.setForeground(isMine ? new Color(0xBDD9F5) : UIConstants.TEXT_SECONDARY);
+        time.setForeground(
+            isMine ? new Color(0xBDD9F5) : UIConstants.TEXT_SECONDARY
+        );
 
         bubble.add(content, BorderLayout.CENTER);
         bubble.add(time, BorderLayout.SOUTH);
 
         // 限制气泡宽度
-        JPanel bubbleWrapper = new JPanel(new FlowLayout(isMine ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0));
+        JPanel bubbleWrapper = new JPanel(
+            new FlowLayout(isMine ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0)
+        );
         bubbleWrapper.setOpaque(false);
         bubbleWrapper.setMaximumSize(new Dimension(500, Integer.MAX_VALUE));
         bubbleWrapper.add(bubble);
@@ -197,11 +211,10 @@ public class ChatPanel extends JPanel {
     }
 
     private void showPlaceholder() {
-        sendBtn.setEnabled(false);
         inputArea.setEnabled(false);
 
         messagesPanel.removeAll();
-        JLabel lbl = new JLabel("← 从左侧选择好友开始聊天");
+        JLabel lbl = new JLabel("Just chat. No distractions.");
         lbl.setForeground(UIConstants.TEXT_SECONDARY);
         lbl.setFont(UIConstants.FONT_LARGE);
         lbl.setAlignmentX(CENTER_ALIGNMENT);
