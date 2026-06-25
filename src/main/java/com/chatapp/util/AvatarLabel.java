@@ -9,9 +9,10 @@ public class AvatarLabel extends JPanel {
     private final Image avatar;
     private final int size;
 
-    public AvatarLabel(String imagePath) {
-        this.size = UIConstants.AVATAR_SIZE;
-        this.avatar = new ImageIcon(imagePath)
+    public AvatarLabel(Long userId, int size) {
+        this.size = size;
+        String imgPath = "src/main/resources/icons/" + (userId % 5) + ".png";
+        this.avatar = new ImageIcon(imgPath)
             .getImage()
             .getScaledInstance(size, size, Image.SCALE_SMOOTH);
         setPreferredSize(new Dimension(size, size));

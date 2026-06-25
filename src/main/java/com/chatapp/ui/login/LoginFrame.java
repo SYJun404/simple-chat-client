@@ -186,7 +186,7 @@ public class LoginFrame extends JFrame {
     private void doLogin() {
         // String username = loginUsernameField.getText().trim();
         // String password = new String(loginPasswordField.getPassword());
-        String username = "1001";
+        String username = "1004";
         String password = "123456";
         if (username.isEmpty() || password.isEmpty()) {
             showError("用户名和密码不能为空");

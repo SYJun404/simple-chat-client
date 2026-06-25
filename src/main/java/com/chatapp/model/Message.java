@@ -4,23 +4,52 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Message {
-    private String sender;
-    private String receiver;
+
+    private Long id;
+    private Long fromUserId;
+    private Long toUserId;
     private String content;
-    private LocalDateTime timestamp;
+    private LocalDateTime sendTime;
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter.ofPattern("HH:mm");
 
-    public Message(String sender, String receiver, String content) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public Message(Long fromUserId, Long toUserId, String content) {
+        this.fromUserId = fromUserId;
+        this.toUserId = toUserId;
         this.content = content;
-        this.timestamp = LocalDateTime.now();
+        this.sendTime = LocalDateTime.now();
     }
 
-    public String getSender() { return sender; }
-    public String getReceiver() { return receiver; }
-    public String getContent() { return content; }
-    public String getFormattedTime() { return timestamp.format(FORMATTER); }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getFromUserId() {
+        return fromUserId;
+    }
+
+    public Long getToUserId() {
+        return toUserId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public LocalDateTime getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(LocalDateTime sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public String getFormattedTime() {
+        return sendTime != null ? sendTime.format(FORMATTER) : "";
+    }
 }

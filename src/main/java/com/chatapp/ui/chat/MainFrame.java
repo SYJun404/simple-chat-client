@@ -1,6 +1,5 @@
 package com.chatapp.ui.chat;
 
-import com.chatapp.service.UserService;
 import com.chatapp.spring.res.UserResponse;
 import com.chatapp.ui.friend.AddFriendDialog;
 import com.chatapp.ui.login.LoginFrame;
@@ -11,10 +10,10 @@ import javax.swing.border.*;
 
 public class MainFrame extends JFrame {
 
-    private final UserService userService = UserService.getInstance();
     private FriendListPanel friendListPanel;
     private ChatPanel chatPanel;
     private JLabel chatTitleLabel;
+    private SessionManager session = SessionManager.getInstance();
 
     public MainFrame() {
         setTitle("Simple Chat");
@@ -77,16 +76,15 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel buildUserBar() {
-        SessionManager session = SessionManager.getInstance();
-
         JPanel panel = new JPanel(new BorderLayout(10, 0));
         panel.setBackground(UIConstants.BG_SIDEBAR);
         panel.setBorder(new EmptyBorder(6, 12, 6, 12));
 
         // 根据ID获取图片地址
-        String imgPath =
-            "src/main/resources/icons/" + (session.getId() % 5) + ".png";
-        AvatarLabel iconAvatar = new AvatarLabel(imgPath);
+        AvatarLabel iconAvatar = new AvatarLabel(
+            session.getId(),
+            UIConstants.AVATAR_SIZE
+        );
         JPanel info = new JPanel(new GridLayout(2, 1, 0, 0));
         info.setOpaque(false);
 
@@ -138,7 +136,6 @@ public class MainFrame extends JFrame {
             UIConstants.TEXT_PRIMARY
         );
         logoutBtn.addActionListener(e -> {
-            userService.logout();
             dispose();
             SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
         });
@@ -171,8 +168,8 @@ public class MainFrame extends JFrame {
         chatTitleLabel.setForeground(UIConstants.TEXT_PRIMARY);
         titleBar.add(chatTitleLabel, BorderLayout.WEST);
 
-        // 聊天区域（初始为空白提示）
-        chatPanel = new ChatPanel();
+        // 聊天区域
+        chatPanel = new ChatPanel(session.getId());
 
         panel.add(titleBar, BorderLayout.NORTH);
         panel.add(chatPanel, BorderLayout.CENTER);
@@ -180,11 +177,11 @@ public class MainFrame extends JFrame {
     }
 
     private void openChat(String friendUsername) {
-        SessionManager session = SessionManager.getInstance();
         UserResponse friend = session.getFriendByName(friendUsername);
         if (friend == null) return;
 
         chatTitleLabel.setText(friend.getNickname());
+        chatPanel.setToUserId(friend.getId());
         chatPanel.loadChat(friend.getUsername());
     }
 }

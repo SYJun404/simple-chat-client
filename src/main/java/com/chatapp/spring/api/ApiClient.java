@@ -2,6 +2,7 @@ package com.chatapp.spring.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -11,7 +12,8 @@ public class ApiClient {
 
     private static final String BASE_URL = "http://localhost:8080/api";
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
-    private static final ObjectMapper MAPPER = new ObjectMapper(); // Jackson
+    private static final ObjectMapper MAPPER =
+        new ObjectMapper().registerModule(new JavaTimeModule());
 
     public static <T> T post(String path, Object body, TypeReference<T> typeRef)
         throws Exception {

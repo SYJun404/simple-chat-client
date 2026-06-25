@@ -107,9 +107,10 @@ public class FriendListPanel extends JPanel {
         item.setMaximumSize(new Dimension(Integer.MAX_VALUE, 56));
         item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        String imgPath =
-            "src/main/resources/icons/" + (friend.getId() % 5) + ".png";
-        AvatarLabel iconAvatar = new AvatarLabel(imgPath);
+        AvatarLabel iconAvatar = new AvatarLabel(
+            friend.getId() % 5,
+            UIConstants.AVATAR_SIZE
+        );
 
         JPanel info = new JPanel(new GridLayout(2, 1, 0, -4));
         info.setOpaque(false);
