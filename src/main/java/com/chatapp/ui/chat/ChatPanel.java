@@ -2,7 +2,6 @@ package com.chatapp.ui.chat;
 
 import com.chatapp.service.MessageService;
 import com.chatapp.spring.res.MesResponse;
-import com.chatapp.spring.res.UserResponse;
 import com.chatapp.util.*;
 import java.awt.*;
 import java.awt.event.*;

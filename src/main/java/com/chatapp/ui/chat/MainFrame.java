@@ -1,10 +1,14 @@
 package com.chatapp.ui.chat;
 
+import com.chatapp.service.MessageService;
+import com.chatapp.spring.api.ApiClient;
 import com.chatapp.spring.res.UserResponse;
 import com.chatapp.ui.friend.AddFriendDialog;
 import com.chatapp.ui.login.LoginFrame;
 import com.chatapp.util.*;
 import java.awt.*;
+import java.io.IOException;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -14,6 +18,7 @@ public class MainFrame extends JFrame {
     private ChatPanel chatPanel;
     private JLabel chatTitleLabel;
     private SessionManager session = SessionManager.getInstance();
+    private MessageService messageService = MessageService.getInstance();
 
     public MainFrame() {
         setTitle("Simple Chat");
@@ -22,6 +27,45 @@ public class MainFrame extends JFrame {
         setMinimumSize(new Dimension(700, 500));
         setLocationRelativeTo(null);
         initUI();
+        // 连接服务器
+        try {
+            messageService.connect(
+                "localhost",
+                8412,
+                session.getUsername(),
+                parts -> {
+                    SwingUtilities.invokeLater(() -> handleProtocol(parts));
+                }
+            );
+        } catch (IOException e) {
+            showError("连接服务器失败：" + e.getMessage());
+        }
+    }
+
+    private void handleProtocol(String[] parts) {
+        switch (parts[0]) {
+            case "MSG":
+                System.out.println(java.util.Arrays.toString(parts));
+                break;
+            case "SERVER":
+                String head = parts[1];
+
+                if (
+                    head.equals("USER_LOGIN") &&
+                    !parts[2].equals(session.getUsername())
+                ) {
+                    friendListPanel.refresh();
+                    AudioUtil.play("/audio/login.mp3");
+                } else if (head.equals("USER_LOGOUT")) {
+                    javax.swing.Timer timer = new javax.swing.Timer(100, e ->
+                        friendListPanel.refresh()
+                    );
+                    timer.setRepeats(false);
+                    timer.start();
+                }
+
+                break;
+        }
     }
 
     private void initUI() {
@@ -136,6 +180,21 @@ public class MainFrame extends JFrame {
             UIConstants.TEXT_PRIMARY
         );
         logoutBtn.addActionListener(e -> {
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    Map<String, String> body = Map.of(
+                        "username",
+                        session.getUsername()
+                    );
+                    // 只发送，不接收/解析返回值
+                    ApiClient.post("/auth/logout", body, null);
+                    return null;
+                }
+            }.execute();
+
+            messageService.send("LOGOUT");
+            session.logout();
             dispose();
             SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
         });
@@ -183,5 +242,14 @@ public class MainFrame extends JFrame {
         chatTitleLabel.setText(friend.getNickname());
         chatPanel.setToUserId(friend.getId());
         chatPanel.loadChat(friend.getUsername());
+    }
+
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(
+            this,
+            msg,
+            "错误",
+            JOptionPane.ERROR_MESSAGE
+        );
     }
 }

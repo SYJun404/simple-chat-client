@@ -1,6 +1,7 @@
 package com.chatapp.util;
 
 import com.chatapp.spring.res.UserResponse;
+import java.util.Comparator;
 import java.util.List;
 
 public class SessionManager {
@@ -36,6 +37,12 @@ public class SessionManager {
     }
 
     public void setFriendList(List<UserResponse> friendList) {
+        friendList.sort(
+            Comparator.comparing(
+                UserResponse::getStatus,
+                Comparator.nullsLast(Integer::compareTo)
+            ).reversed()
+        );
         this.friendList = friendList;
     }
 
