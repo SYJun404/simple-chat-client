@@ -47,7 +47,7 @@ public class MessageService {
             ) {
                 String line;
                 while ((line = in.readLine()) != null) {
-                    onMessage.accept(line.split("\\|", 3));
+                    onMessage.accept(line.split("\\|", -1));
                 }
             } catch (IOException e) {
                 onMessage.accept(new String[] { "SERVER", "DISCONNECTED" });
