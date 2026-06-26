@@ -144,32 +144,17 @@ public class MainFrame extends JFrame {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIConstants.BG_DARK);
 
-        // ── 左侧边栏 ──
+        // ── 左侧边栏（固定宽度 + 右边框作为分割线）──
         JPanel sidebar = buildSidebar();
         sidebar.setPreferredSize(new Dimension(UIConstants.SIDEBAR_WIDTH, 0));
+        sidebar.setBorder(new MatteBorder(0, 0, 0, 1, UIConstants.BORDER));
 
         // ── 右侧主区域 ──
         JPanel mainArea = buildMainArea();
 
-        // 分割线
-        JSeparator sep = new JSeparator(JSeparator.VERTICAL);
-        sep.setForeground(UIConstants.BORDER);
-        sep.setPreferredSize(new Dimension(1, 0));
-
         root.add(sidebar, BorderLayout.WEST);
-        root.add(sep, BorderLayout.CENTER);
-
-        JSplitPane split = new JSplitPane(
-            JSplitPane.HORIZONTAL_SPLIT,
-            sidebar,
-            mainArea
-        );
-        split.setDividerLocation(UIConstants.SIDEBAR_WIDTH);
-        split.setDividerSize(1);
-        split.setBorder(null);
-        split.setBackground(UIConstants.BORDER);
-
-        setContentPane(split);
+        root.add(mainArea, BorderLayout.CENTER);
+        setContentPane(root);
     }
 
     private JPanel buildSidebar() {
@@ -245,7 +230,7 @@ public class MainFrame extends JFrame {
 
         StyledButton logoutBtn = new StyledButton(
             "× 退出",
-            new Color(0xC8CDD4),
+            new Color(0xD4D4D4),
             new Color(0xB0B8C1),
             UIConstants.TEXT_PRIMARY
         );

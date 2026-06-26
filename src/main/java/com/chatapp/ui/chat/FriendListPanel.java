@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.*;
 
 public class FriendListPanel extends JPanel {
 
@@ -25,10 +25,15 @@ public class FriendListPanel extends JPanel {
         setBackground(UIConstants.BG_SIDEBAR);
 
         // 标签
-        JLabel label = new JLabel("  好友列表");
+        JLabel label = new JLabel("  ▍ 始料未及的温柔");
         label.setFont(UIConstants.FONT_SMALL);
         label.setForeground(UIConstants.TEXT_SECONDARY);
-        label.setBorder(new EmptyBorder(10, 8, 4, 0));
+        label.setBorder(
+            BorderFactory.createCompoundBorder(
+                new MatteBorder(0, 0, 1, 0, UIConstants.BORDER),
+                new EmptyBorder(10, 8, 7, 0)
+            )
+        );
         add(label, BorderLayout.NORTH);
 
         // 列表

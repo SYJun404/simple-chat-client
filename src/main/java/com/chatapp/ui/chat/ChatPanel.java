@@ -54,14 +54,14 @@ public class ChatPanel extends JPanel {
         // 消息区域
         messagesPanel = new JPanel();
         messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
-        messagesPanel.setBackground(UIConstants.BG_DARK);
+        messagesPanel.setBackground(UIConstants.BG_SIDEBAR);
         messagesPanel.setBorder(new EmptyBorder(16, 20, 16, 20));
         messagesPanel.setAutoscrolls(true);
 
         scrollPane = new JScrollPane(messagesPanel);
         scrollPane.setBorder(null);
         scrollPane.setBackground(UIConstants.BG_DARK);
-        scrollPane.getViewport().setBackground(UIConstants.BG_DARK);
+        scrollPane.getViewport().setBackground(UIConstants.BG_SIDEBAR);
         scrollPane.setHorizontalScrollBarPolicy(
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         );
@@ -80,7 +80,7 @@ public class ChatPanel extends JPanel {
 
     private JPanel buildInputPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 0));
-        panel.setBackground(UIConstants.BG_DARK);
+        panel.setBackground(UIConstants.BG_SIDEBAR);
         panel.setBorder(
             new CompoundBorder(
                 new MatteBorder(1, 0, 0, 0, UIConstants.BORDER),
