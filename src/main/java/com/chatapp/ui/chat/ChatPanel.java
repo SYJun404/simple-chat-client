@@ -93,14 +93,12 @@ public class ChatPanel extends JPanel {
                 new EmptyBorder(8, 8, 8, 8)
             )
         );
-        // Ctrl+Enter 发送
+        // Cmd+Enter 发送
         inputArea.addKeyListener(
             new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if (
-                        e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()
-                    ) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isMetaDown()) {
                         e.consume();
                         doSend();
                     }
@@ -135,6 +133,7 @@ public class ChatPanel extends JPanel {
 
     public void refreshMessages() {
         messagesPanel.removeAll();
+        messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
 
         Long me = fromUserId;
         if (me == null || toUserId == null) return;
@@ -142,28 +141,28 @@ public class ChatPanel extends JPanel {
         List<MesResponse> messages = messageService.getHistory(me, toUserId);
 
         if (messages.isEmpty()) {
-            // 空状态居中
-            messagesPanel.setLayout(
-                new BoxLayout(messagesPanel, BoxLayout.Y_AXIS)
-            );
             messagesPanel.add(Box.createVerticalGlue());
-            JLabel empty = new JLabel("暂无消息，发个招呼吧 👋");
+            JLabel empty = new JLabel("暂无消息，打个招呼吧 👋");
             empty.setForeground(UIConstants.TEXT_SECONDARY);
             empty.setFont(UIConstants.FONT_NORMAL);
             empty.setAlignmentX(CENTER_ALIGNMENT);
             messagesPanel.add(empty);
             messagesPanel.add(Box.createVerticalGlue());
         } else {
-            // 消息从底部往上堆叠
-            messagesPanel.setLayout(
-                new BoxLayout(messagesPanel, BoxLayout.Y_AXIS)
-            );
-            messagesPanel.add(Box.createVerticalGlue());
             for (MesResponse msg : messages) {
                 boolean isMine = msg.getFromUserId().equals(me);
-                messagesPanel.add(buildBubble(msg, isMine));
+                JPanel bubble = buildBubble(msg, isMine);
+
+                bubble.setMaximumSize(
+                    new Dimension(
+                        Integer.MAX_VALUE,
+                        bubble.getPreferredSize().height
+                    )
+                );
+                messagesPanel.add(bubble);
                 messagesPanel.add(Box.createVerticalStrut(8));
             }
+            messagesPanel.add(Box.createVerticalGlue());
         }
 
         messagesPanel.revalidate();
@@ -171,31 +170,77 @@ public class ChatPanel extends JPanel {
         scrollToBottom();
     }
 
+    private String normalizeForMeasure(String text) {
+        // 匹配所有 emoji（包括肤色修饰符、ZWJ序列、变体选择符等）
+        String emojiRegex =
+            "[\\x{1F000}-\\x{1FFFF}\\x{2600}-\\x{27FF}\\x{FE00}-\\x{FEFF}\\x{1F3FB}-\\x{1F3FF}\\x{200D}]+";
+        return text.replaceAll(emojiRegex, "□□");
+    }
+
     private JPanel buildBubble(MesResponse msg, boolean isMine) {
         JPanel row = new JPanel(new BorderLayout(8, 0));
         row.setOpaque(false);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         AvatarLabel avatar = new AvatarLabel(msg.getFromUserId(), 32);
 
-        // 气泡内容
+        // ★ 用 FontMetrics 量文字，决定气泡宽度
+        Font msgFont = UIConstants.FONT_NORMAL.deriveFont(15f);
+        FontMetrics fm = getFontMetrics(msgFont);
+        String text = msg.getContent();
+
+        int maxWidth = 320; // 气泡最大文字区宽度
+        int hPad = 25; // 左右 padding 各 12 + 1
+        int vPad = 8 + 6 + 16 + 8; // 上8 + content底margin6 + time行16 + 下8
+
+        // 按 maxWidth 折行，计算实际需要几行
+        String[] lines = normalizeForMeasure(msg.getContent()).split("\n", -1);
+
+        int actualWidth = 0;
+        int totalHeight = 0;
+        for (String line : lines) {
+            // 当前行超过 maxWidth 则折行
+            int lineW = fm.stringWidth(line);
+            if (lineW <= maxWidth) {
+                actualWidth = Math.max(actualWidth, lineW);
+                totalHeight += fm.getHeight();
+            } else {
+                // 超长行按 maxWidth 折算行数
+                int rows = (int) Math.ceil((double) lineW / maxWidth);
+                actualWidth = maxWidth;
+                totalHeight += fm.getHeight() * rows;
+            }
+        }
+
+        FontMetrics timeFm = getFontMetrics(UIConstants.FONT_SMALL);
+        int timeWidth =
+            timeFm.stringWidth(formatSendTime(msg.getSendTime())) + hPad;
+
+        int bubbleW = Math.max(
+            Math.min(actualWidth, maxWidth) + hPad,
+            timeWidth
+        );
+        int bubbleH = totalHeight + vPad;
+
+        // 气泡
         JPanel bubble = new RoundedPanel(
             16,
             isMine ? UIConstants.ACCENT : UIConstants.BG_BUBBLE_OTHER
         );
         bubble.setLayout(new BorderLayout());
         bubble.setBorder(new EmptyBorder(8, 12, 8, 12));
+        bubble.setPreferredSize(new Dimension(bubbleW, bubbleH));
+        bubble.setMinimumSize(new Dimension(bubbleW, bubbleH));
+        bubble.setMaximumSize(new Dimension(bubbleW, bubbleH));
 
-        JTextArea content = new JTextArea(msg.getContent());
+        JTextArea content = new JTextArea(text);
         content.setEditable(false);
         content.setOpaque(false);
-        content.setFont(UIConstants.FONT_NORMAL.deriveFont(15f));
+        content.setFont(msgFont);
         content.setForeground(
             isMine ? UIConstants.TEXT_WHITE : UIConstants.TEXT_PRIMARY
         );
         content.setLineWrap(true);
         content.setWrapStyleWord(true);
-        content.setColumns(10);
         content.setMargin(new Insets(0, 0, 6, 0));
 
         JLabel time = new JLabel(formatSendTime(msg.getSendTime()));
@@ -207,12 +252,11 @@ public class ChatPanel extends JPanel {
         bubble.add(content, BorderLayout.CENTER);
         bubble.add(time, BorderLayout.SOUTH);
 
-        // 限制气泡宽度
+        // 气泡靠左或靠右
         JPanel bubbleWrapper = new JPanel(
             new FlowLayout(isMine ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0)
         );
         bubbleWrapper.setOpaque(false);
-        bubbleWrapper.setMaximumSize(new Dimension(500, Integer.MAX_VALUE));
         bubbleWrapper.add(bubble);
 
         if (isMine) {
