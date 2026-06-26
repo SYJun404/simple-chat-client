@@ -87,6 +87,7 @@ public class MainFrame extends JFrame {
                 .getChatHistory()
                 .computeIfAbsent(key, k -> new java.util.ArrayList<>())
                 .add(mes);
+            AudioUtil.play("/audio/message.mp3");
 
             // 如果当前正在和该消息相关方聊天，刷新消息列表
             Long activeFriend = chatPanel.getToUserId();
@@ -310,6 +311,7 @@ public class MainFrame extends JFrame {
         chatTitleLabel.setText(friend.getNickname());
         chatPanel.setToUserId(friend.getId());
         chatPanel.loadChat(friend.getUsername());
+        chatPanel.showInput();
     }
 
     private void showError(String msg) {

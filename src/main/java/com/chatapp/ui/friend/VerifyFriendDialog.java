@@ -5,7 +5,6 @@ import com.chatapp.spring.res.*;
 import com.chatapp.util.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,19 +151,19 @@ public class VerifyFriendDialog extends JDialog {
         listPanel.repaint();
     }
 
-    private void showEmpty() {
-        listPanel.removeAll();
-        listPanel.setLayout(new GridBagLayout());
-        listPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+    // private void showEmpty() {
+    //     listPanel.removeAll();
+    //     listPanel.setLayout(new GridBagLayout());
+    //     listPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-        JLabel emptyLabel = new JLabel("暂未收到好友请求");
-        emptyLabel.setFont(UIConstants.FONT_NORMAL);
-        emptyLabel.setForeground(UIConstants.TEXT_SECONDARY);
-        listPanel.add(emptyLabel);
+    //     JLabel emptyLabel = new JLabel("暂未收到好友请求");
+    //     emptyLabel.setFont(UIConstants.FONT_NORMAL);
+    //     emptyLabel.setForeground(UIConstants.TEXT_SECONDARY);
+    //     listPanel.add(emptyLabel);
 
-        listPanel.revalidate();
-        listPanel.repaint();
-    }
+    //     listPanel.revalidate();
+    //     listPanel.repaint();
+    // }
 
     // ── 单行请求卡片 ──
     private JPanel createRequestRow(RecResponse requester) {

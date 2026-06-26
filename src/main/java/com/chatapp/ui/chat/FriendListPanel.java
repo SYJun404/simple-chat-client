@@ -28,7 +28,7 @@ public class FriendListPanel extends JPanel {
         JLabel label = new JLabel("  好友列表");
         label.setFont(UIConstants.FONT_SMALL);
         label.setForeground(UIConstants.TEXT_SECONDARY);
-        label.setBorder(new EmptyBorder(10, 6, 4, 0));
+        label.setBorder(new EmptyBorder(10, 8, 4, 0));
         add(label, BorderLayout.NORTH);
 
         // 列表

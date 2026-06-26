@@ -29,9 +29,12 @@ public class ChatPanel extends JPanel {
     private String currentFriend;
     private Long fromUserId;
     private Long toUserId;
+    private boolean isShowInput;
+    private JPanel inputJ;
 
     public ChatPanel(Long curUserId) {
         this.fromUserId = curUserId;
+        this.isShowInput = false;
         setLayout(new BorderLayout());
         setBackground(UIConstants.BG_DARK);
         initUI();
@@ -64,10 +67,15 @@ public class ChatPanel extends JPanel {
         );
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         add(scrollPane, BorderLayout.CENTER);
+        inputJ = buildInputPanel();
+    }
 
+    public void showInput() {
         // 输入区域
-        JPanel inputPanel = buildInputPanel();
-        add(inputPanel, BorderLayout.SOUTH);
+        if (!isShowInput) {
+            add(inputJ, BorderLayout.SOUTH);
+            this.isShowInput = true;
+        }
     }
 
     private JPanel buildInputPanel() {
@@ -301,6 +309,8 @@ public class ChatPanel extends JPanel {
 
         messagesPanel.removeAll();
         JLabel lbl = new JLabel("Just chat. No distractions.");
+        lbl.setBorder(new EmptyBorder(0, 0, 60, 0));
+
         lbl.setForeground(UIConstants.TEXT_SECONDARY);
         lbl.setFont(UIConstants.FONT_LARGE);
         lbl.setAlignmentX(CENTER_ALIGNMENT);
