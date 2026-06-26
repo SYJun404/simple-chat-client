@@ -39,6 +39,10 @@ public class ChatPanel extends JPanel {
         messageService.getHistoryFromServer(curUserId);
     }
 
+    public Long getToUserId() {
+        return toUserId;
+    }
+
     public void setToUserId(Long toUserId) {
         this.toUserId = toUserId;
     }
@@ -129,7 +133,7 @@ public class ChatPanel extends JPanel {
         inputArea.requestFocus();
     }
 
-    private void refreshMessages() {
+    public void refreshMessages() {
         messagesPanel.removeAll();
 
         Long me = fromUserId;
@@ -150,7 +154,7 @@ public class ChatPanel extends JPanel {
             messagesPanel.add(empty);
             messagesPanel.add(Box.createVerticalGlue());
         } else {
-            // 消息从底部往上堆叠（聊天软件标准行为）
+            // 消息从底部往上堆叠
             messagesPanel.setLayout(
                 new BoxLayout(messagesPanel, BoxLayout.Y_AXIS)
             );
@@ -191,7 +195,7 @@ public class ChatPanel extends JPanel {
         );
         content.setLineWrap(true);
         content.setWrapStyleWord(true);
-        content.setMaximumSize(new Dimension(400, Integer.MAX_VALUE));
+        content.setColumns(10);
         content.setMargin(new Insets(0, 0, 6, 0));
 
         JLabel time = new JLabel(formatSendTime(msg.getSendTime()));

@@ -79,6 +79,27 @@ public class MessageService {
                     0
                 )
             );
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                Map<String, Object> body = Map.of(
+                    "fromUserId",
+                    fromId,
+                    "toUserId",
+                    toId,
+                    "content",
+                    content
+                );
+                // 只发送，不接收/解析返回值
+                ApiClient.post("/chat/send-swing", body, null);
+                return null;
+            }
+        }.execute();
+    }
+
+    public Map<String, List<MesResponse>> getChatHistory() {
+        return chatHistory;
     }
 
     public List<MesResponse> getHistory(Long a, Long b) {

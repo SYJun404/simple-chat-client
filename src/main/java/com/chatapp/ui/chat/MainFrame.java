@@ -2,11 +2,14 @@ package com.chatapp.ui.chat;
 
 import com.chatapp.service.MessageService;
 import com.chatapp.spring.api.ApiClient;
+import com.chatapp.spring.res.MesResponse;
 import com.chatapp.spring.res.UserResponse;
 import com.chatapp.ui.friend.AddFriendDialog;
 import com.chatapp.ui.friend.VerifyFriendDialog;
 import com.chatapp.ui.login.LoginFrame;
 import com.chatapp.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Map;
@@ -57,42 +60,83 @@ public class MainFrame extends JFrame {
         timer.start();
     }
 
+    private static final ObjectMapper MAPPER =
+        new ObjectMapper().registerModule(new JavaTimeModule());
+
     private void handleProtocol(String[] parts) {
         switch (parts[0]) {
             case "MSG":
-                System.out.println(java.util.Arrays.toString(parts));
+                handleMsg(parts[1]);
                 break;
             case "SERVER":
-                String head = parts[1];
-
-                if (
-                    head.equals("USER_LOGIN") &&
-                    !parts[2].equals(session.getUsername())
-                ) {
-                    friendListPanel.refresh();
-                    // 当前上线的用户，是我的好友，就播放上线提示音频
-                    String userName = parts[2];
-                    if (session.getFriendByName(userName) != null) {
-                        AudioUtil.play("/audio/login.mp3");
-                    }
-                } else if (head.equals("USER_LOGOUT")) {
-                    javax.swing.Timer timer = new javax.swing.Timer(100, e ->
-                        friendListPanel.refresh()
-                    );
-                    timer.setRepeats(false);
-                    timer.start();
-                } else if (head.equals("FRIEND_REQUEST")) {
-                    SwingUtilities.invokeLater(() -> {
-                        VerifyFriendDialog verifyFriendDialog =
-                            new VerifyFriendDialog(this);
-                        verifyFriendDialog.checkAndShow(session.getUsername());
-                    });
-                } else if (head.equals("FRIEND_ACCEPT")) {
-                    friendListPanel.refresh();
-                }
-
+                handleServer(parts);
                 break;
         }
+    }
+
+    private void handleMsg(String jsonStr) {
+        try {
+            MesResponse mes = MAPPER.readValue(jsonStr, MesResponse.class);
+
+            // 存入本地缓存
+            String key =
+                mes.getFromUserId() < mes.getToUserId()
+                    ? mes.getFromUserId() + "|" + mes.getToUserId()
+                    : mes.getToUserId() + "|" + mes.getFromUserId();
+            messageService
+                .getChatHistory()
+                .computeIfAbsent(key, k -> new java.util.ArrayList<>())
+                .add(mes);
+
+            // 如果当前正在和该消息相关方聊天，刷新消息列表
+            Long activeFriend = chatPanel.getToUserId();
+            if (activeFriend.equals(mes.getFromUserId())) {
+                chatPanel.refreshMessages();
+            }
+        } catch (Exception e) {
+            System.out.println("消息解析失败: " + e.getMessage());
+        }
+    }
+
+    private void handleServer(String[] parts) {
+        String head = parts[1];
+        if (
+            head.equals("USER_LOGIN") && !parts[2].equals(session.getUsername())
+        ) {
+            handleUserLogin(parts[2]);
+        } else if (head.equals("USER_LOGOUT")) {
+            handleUserLogout();
+        } else if (head.equals("FRIEND_REQUEST")) {
+            handleFriendRequest();
+        } else if (head.equals("FRIEND_ACCEPT")) {
+            handleFriendAccept();
+        }
+    }
+
+    private void handleUserLogin(String userName) {
+        friendListPanel.refresh();
+        if (session.getFriendByName(userName) != null) {
+            AudioUtil.play("/audio/login.mp3");
+        }
+    }
+
+    private void handleUserLogout() {
+        javax.swing.Timer timer = new javax.swing.Timer(100, e ->
+            friendListPanel.refresh()
+        );
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private void handleFriendRequest() {
+        SwingUtilities.invokeLater(() -> {
+            VerifyFriendDialog dialog = new VerifyFriendDialog(this);
+            dialog.checkAndShow(session.getUsername());
+        });
+    }
+
+    private void handleFriendAccept() {
+        friendListPanel.refresh();
     }
 
     private void initUI() {
@@ -263,7 +307,6 @@ public class MainFrame extends JFrame {
     private void openChat(String friendUsername) {
         UserResponse friend = session.getFriendByName(friendUsername);
         if (friend == null) return;
-
         chatTitleLabel.setText(friend.getNickname());
         chatPanel.setToUserId(friend.getId());
         chatPanel.loadChat(friend.getUsername());

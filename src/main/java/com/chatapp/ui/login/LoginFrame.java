@@ -30,7 +30,7 @@ public class LoginFrame extends JFrame {
     private JPasswordField regConfirmField;
 
     public LoginFrame() {
-        setTitle("Simple Chat");
+        setTitle("");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setSize(420, 540);
