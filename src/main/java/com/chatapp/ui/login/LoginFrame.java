@@ -36,7 +36,7 @@ public class LoginFrame extends JFrame {
         setSize(420, 540);
         setLocationRelativeTo(null);
         setBackground(UIConstants.BG_DARK);
-        setLocation(1500, 200);
+        // setLocation(1500, 200);
         initUI();
     }
 

@@ -4,6 +4,7 @@ import com.chatapp.service.MessageService;
 import com.chatapp.spring.api.ApiClient;
 import com.chatapp.spring.res.UserResponse;
 import com.chatapp.ui.friend.AddFriendDialog;
+import com.chatapp.ui.friend.VerifyFriendDialog;
 import com.chatapp.ui.login.LoginFrame;
 import com.chatapp.util.*;
 import java.awt.*;
@@ -27,6 +28,9 @@ public class MainFrame extends JFrame {
         setMinimumSize(new Dimension(700, 500));
         setLocationRelativeTo(null);
         initUI();
+
+        // 是否有好友申请认证请求
+        checkFriendReq();
         // 连接服务器
         try {
             messageService.connect(
@@ -42,6 +46,17 @@ public class MainFrame extends JFrame {
         }
     }
 
+    private void checkFriendReq() {
+        javax.swing.Timer timer = new javax.swing.Timer(1500, e -> {
+            VerifyFriendDialog verifyFriendDialog = new VerifyFriendDialog(
+                this
+            );
+            verifyFriendDialog.checkAndShow(session.getUsername());
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
     private void handleProtocol(String[] parts) {
         switch (parts[0]) {
             case "MSG":
@@ -55,13 +70,25 @@ public class MainFrame extends JFrame {
                     !parts[2].equals(session.getUsername())
                 ) {
                     friendListPanel.refresh();
-                    AudioUtil.play("/audio/login.mp3");
+                    // 当前上线的用户，是我的好友，就播放上线提示音频
+                    String userName = parts[2];
+                    if (session.getFriendByName(userName) != null) {
+                        AudioUtil.play("/audio/login.mp3");
+                    }
                 } else if (head.equals("USER_LOGOUT")) {
                     javax.swing.Timer timer = new javax.swing.Timer(100, e ->
                         friendListPanel.refresh()
                     );
                     timer.setRepeats(false);
                     timer.start();
+                } else if (head.equals("FRIEND_REQUEST")) {
+                    SwingUtilities.invokeLater(() -> {
+                        VerifyFriendDialog verifyFriendDialog =
+                            new VerifyFriendDialog(this);
+                        verifyFriendDialog.checkAndShow(session.getUsername());
+                    });
+                } else if (head.equals("FRIEND_ACCEPT")) {
+                    friendListPanel.refresh();
                 }
 
                 break;
@@ -168,9 +195,7 @@ public class MainFrame extends JFrame {
             UIConstants.ACCENT_HOVER
         );
         addFriendBtn.addActionListener(e -> {
-            new AddFriendDialog(this, () ->
-                friendListPanel.refresh()
-            ).setVisible(true);
+            new AddFriendDialog(this).setVisible(true);
         });
 
         StyledButton logoutBtn = new StyledButton(
