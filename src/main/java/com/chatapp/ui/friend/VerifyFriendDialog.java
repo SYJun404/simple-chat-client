@@ -191,7 +191,8 @@ public class VerifyFriendDialog extends JDialog {
         //
         AvatarLabel iconAvatar = new AvatarLabel(
             requester.getFromUserId() % 5,
-            UIConstants.AVATAR_SIZE,0
+            UIConstants.AVATAR_SIZE,
+            0
         );
 
         JPanel info = new JPanel();
@@ -258,7 +259,7 @@ public class VerifyFriendDialog extends JDialog {
                 Map<String, Long> body = new HashMap<>();
                 body.put("fromUserId", requester.getFromUserId());
                 body.put("toUserId", curUserId);
-                body.put("recordId", requester.getReqId());
+                body.put("recordId", requester.getFromRecordId());
                 return ApiClient.post(
                     "/friends/accepted-swing",
                     body,
@@ -297,7 +298,7 @@ public class VerifyFriendDialog extends JDialog {
             protected ApiResponse<Void> doInBackground() throws Exception {
                 return ApiClient.post(
                     "/friends/requests/mark-read?recordId=" +
-                        requester.getReqId(),
+                        requester.getFromRecordId(),
                     null,
                     new TypeReference<ApiResponse<Void>>() {}
                 );

@@ -9,7 +9,7 @@ public class AvatarLabel extends JPanel {
 
     private final Image avatar;
     private final int size;
-    private final int type;
+    private int type;
 
     public AvatarLabel(Long userId, int size, int type) {
         this.type = type;
@@ -20,6 +20,12 @@ public class AvatarLabel extends JPanel {
             .getScaledInstance(size, size, Image.SCALE_SMOOTH);
         setPreferredSize(new Dimension(size, size));
         setOpaque(false);
+    }
+
+    /** 切换背景色类型: 0=白色, 1=蓝色, 并重绘 */
+    public void setType(int type) {
+        this.type = type;
+        repaint();
     }
 
     @Override

@@ -114,7 +114,8 @@ public class FriendListPanel extends JPanel {
 
         AvatarLabel iconAvatar = new AvatarLabel(
             friend.getId() % 5,
-            UIConstants.AVATAR_SIZE,0
+            UIConstants.AVATAR_SIZE,
+            0
         );
 
         JPanel info = new JPanel(new GridLayout(2, 1, 0, -4));
@@ -158,11 +159,21 @@ public class FriendListPanel extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     selectedUsername = friend.getUsername();
-                    // 重置其他项
+                    // 重置其他项的背景和头像
                     for (Component c : listContainer.getComponents()) {
                         c.setBackground(UIConstants.BG_SIDEBAR);
+                        if (c instanceof JPanel) {
+                            for (Component child : (
+                                (JPanel) c
+                            ).getComponents()) {
+                                if (child instanceof AvatarLabel) {
+                                    ((AvatarLabel) child).setType(0);
+                                }
+                            }
+                        }
                     }
                     item.setBackground(new Color(0xD3E4F5));
+                    iconAvatar.setType(1);
                     onSelect.accept(friend.getUsername());
                 }
             }

@@ -25,7 +25,7 @@ public class MainFrame extends JFrame {
     private MessageService messageService = MessageService.getInstance();
 
     public MainFrame() {
-        setTitle("Simple Chat");
+        setTitle("");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 650);
         setMinimumSize(new Dimension(700, 500));
@@ -180,30 +180,27 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel buildUserBar() {
-        JPanel panel = new JPanel(new BorderLayout(10, 0));
+        JPanel panel = new JPanel(new BorderLayout(12, 0)); // hgap=10,图片和名称之间留10px间隔
         panel.setBackground(UIConstants.BG_SIDEBAR);
-        panel.setBorder(new EmptyBorder(6, 12, 6, 12));
+        panel.setBorder(new EmptyBorder(11, 12, 8, 12));
 
         // 根据ID获取图片地址
-        AvatarLabel iconAvatar = new AvatarLabel(
-            session.getId(),
-            UIConstants.AVATAR_SIZE,
-            0
-        );
-        JPanel info = new JPanel(new GridLayout(2, 1, 0, 0));
+        ImageIcon icon = loadIcon("src/main/resources/chat-icon.png", 32, 32);
+        JLabel iconAvatar = new JLabel(icon);
+
+        // 使用 GridBagLayout 让名称垂直居中、水平靠左
+        JPanel info = new JPanel(new GridBagLayout());
         info.setOpaque(false);
 
-        JLabel nameLabel = new JLabel(session.getNickname());
-        nameLabel.setFont(UIConstants.FONT_NORMAL);
+        JLabel nameLabel = new JLabel("Simple Chat");
+        nameLabel.setFont(UIConstants.FONT_LARGE);
         nameLabel.setForeground(UIConstants.TEXT_PRIMARY);
-        nameLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
 
-        JLabel statusLabel = new JLabel("● 在线");
-        statusLabel.setFont(UIConstants.FONT_SMALL);
-        statusLabel.setForeground(new Color(0x18A058));
-
-        info.add(nameLabel);
-        info.add(statusLabel);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST; // 水平靠左对齐
+        gbc.weightx = 1.0; // 占满水平方向剩余空间,防止anchor无效
+        gbc.weighty = 1.0; // 占满垂直方向,配合anchor=WEST实现"垂直居中、水平靠左"
+        info.add(nameLabel, gbc);
 
         panel.add(iconAvatar, BorderLayout.WEST);
         panel.add(info, BorderLayout.CENTER);
@@ -216,6 +213,13 @@ public class MainFrame extends JFrame {
         sep.setForeground(UIConstants.BORDER);
         wrapper.add(sep, BorderLayout.SOUTH);
         return wrapper;
+    }
+
+    private ImageIcon loadIcon(String path, int w, int h) {
+        ImageIcon icon = new ImageIcon(path);
+        return new ImageIcon(
+            icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH)
+        );
     }
 
     private JPanel buildSidebarButtons() {

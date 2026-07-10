@@ -3,7 +3,7 @@ package com.chatapp.spring.res;
 public class RecResponse {
 
     /** 当前记录的请求ID */
-    private Long reqId;
+    private Long fromRecordId;
 
     /** 发起请求的用户ID */
     private Long fromUserId;
@@ -18,12 +18,12 @@ public class RecResponse {
         return fromUserId;
     }
 
-    public void setReqId(Long reqId) {
-        this.reqId = reqId;
+    public void setFromRecordId(Long reqId) {
+        this.fromRecordId = reqId;
     }
 
-    public Long getReqId() {
-        return reqId;
+    public Long getFromRecordId() {
+        return fromRecordId;
     }
 
     public void setFromUserId(Long fromUserId) {
