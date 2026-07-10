@@ -91,7 +91,10 @@ public class MainFrame extends JFrame {
 
             // 如果当前正在和该消息相关方聊天，刷新消息列表
             Long activeFriend = chatPanel.getToUserId();
-            if (activeFriend.equals(mes.getFromUserId())) {
+            if (
+                activeFriend.equals(mes.getFromUserId()) ||
+                session.getId().equals(mes.getFromUserId())
+            ) {
                 chatPanel.refreshMessages();
             }
         } catch (Exception e) {
@@ -184,7 +187,8 @@ public class MainFrame extends JFrame {
         // 根据ID获取图片地址
         AvatarLabel iconAvatar = new AvatarLabel(
             session.getId(),
-            UIConstants.AVATAR_SIZE
+            UIConstants.AVATAR_SIZE,
+            0
         );
         JPanel info = new JPanel(new GridLayout(2, 1, 0, 0));
         info.setOpaque(false);
@@ -273,14 +277,32 @@ public class MainFrame extends JFrame {
         titleBar.setBorder(
             new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0, UIConstants.BORDER),
-                new EmptyBorder(17, 20, 17, 20)
+                new EmptyBorder(10, 20, 10, 20)
             )
         );
 
         chatTitleLabel = new JLabel("← 从左侧选择好友开始聊天");
         chatTitleLabel.setFont(UIConstants.FONT_LARGE);
         chatTitleLabel.setForeground(UIConstants.TEXT_PRIMARY);
+
+        AvatarLabel iconAvatar = new AvatarLabel(session.getId(), 32, 1);
+        iconAvatar.setBackground(UIConstants.ACCENT);
+
+        JLabel iconNameLabel = new JLabel(session.getNickname());
+        iconNameLabel.setFont(UIConstants.FONT_LARGE);
+        iconNameLabel.setForeground(UIConstants.ACCENT);
+        iconNameLabel.setBorder(new EmptyBorder(0, 12, 0, 8));
+
+        JPanel rightPanel = new RPanel();
+        // 内层面板：label 和 avatar 紧贴排列，再用 CENTER 填充 RPanel
+        JPanel innerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        innerPanel.setOpaque(false);
+        innerPanel.add(iconNameLabel);
+        innerPanel.add(iconAvatar);
+        rightPanel.add(innerPanel, BorderLayout.CENTER);
+
         titleBar.add(chatTitleLabel, BorderLayout.WEST);
+        titleBar.add(rightPanel, BorderLayout.EAST);
 
         // 聊天区域
         chatPanel = new ChatPanel(session.getId());

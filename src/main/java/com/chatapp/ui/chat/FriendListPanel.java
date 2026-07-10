@@ -114,7 +114,7 @@ public class FriendListPanel extends JPanel {
 
         AvatarLabel iconAvatar = new AvatarLabel(
             friend.getId() % 5,
-            UIConstants.AVATAR_SIZE
+            UIConstants.AVATAR_SIZE,0
         );
 
         JPanel info = new JPanel(new GridLayout(2, 1, 0, -4));

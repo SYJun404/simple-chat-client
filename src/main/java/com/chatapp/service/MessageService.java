@@ -92,7 +92,7 @@ public class MessageService {
                     content
                 );
                 // 只发送，不接收/解析返回值
-                ApiClient.post("/chat/send-swing", body, null);
+                ApiClient.post("/chat/send/swing", body, null);
                 return null;
             }
         }.execute();

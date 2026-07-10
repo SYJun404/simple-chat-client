@@ -191,7 +191,7 @@ public class VerifyFriendDialog extends JDialog {
         //
         AvatarLabel iconAvatar = new AvatarLabel(
             requester.getFromUserId() % 5,
-            UIConstants.AVATAR_SIZE
+            UIConstants.AVATAR_SIZE,0
         );
 
         JPanel info = new JPanel();
