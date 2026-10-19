@@ -257,6 +257,7 @@ public class MainFrame extends JFrame {
             }.execute();
 
             messageService.send("LOGOUT");
+            messageService.logout();
             session.logout();
             dispose();
             SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));

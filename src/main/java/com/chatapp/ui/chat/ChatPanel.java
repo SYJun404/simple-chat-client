@@ -189,7 +189,7 @@ public class ChatPanel extends JPanel {
         JPanel row = new JPanel(new BorderLayout(8, 0));
         row.setOpaque(false);
 
-        AvatarLabel avatar = new AvatarLabel(msg.getFromUserId(), 32,0);
+        AvatarLabel avatar = new AvatarLabel(msg.getFromUserId(), 32, 0);
 
         // ★ 用 FontMetrics 量文字，决定气泡宽度
         Font msgFont = UIConstants.FONT_NORMAL.deriveFont(15f);

@@ -29,6 +29,31 @@ public class MessageService {
         return instance;
     }
 
+    /** 关闭连接并清空本地聊天记录 */
+    public void logout() {
+        disconnect();
+        clearChatHistory();
+    }
+
+    /** 断开 WebSocket 连接 */
+    public void disconnect() {
+        try {
+            if (out != null) {
+                out.close();
+                out = null;
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+                socket = null;
+            }
+        } catch (IOException ignored) {}
+    }
+
+    /** 清空本地聊天记录缓存 */
+    public void clearChatHistory() {
+        chatHistory.clear();
+    }
+
     public void connect(
         String host,
         int port,
